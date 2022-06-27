@@ -13,7 +13,7 @@
 
     <script>
 
-        let width = 800, height = 800;
+        let width = 900, height = 900;
 
         let svg = d3.select("svg")
             .attr("viewBox", "0 0 " + width + " " + height)
@@ -30,19 +30,43 @@
             console.log(data[0]); //links
             console.log(data[1]); //cases
 
+            // create a tooltip
+            var Tooltip = d3.select("svg")
+                .data(data[1])
+                .append("div")
+                .style("opacity", 0)
+                .attr("class", "tooltip")
+                .style("background-color", "white")
+                .style("border", "solid")
+                .style("border-width", "2px")
+                .style("border-radius", "5px")
+                .style("padding", "5px")
+
+            let mouseOver = function (event, d) {
+                Tooltip
+                    .html("Age: " + d.age + "<br>" + "Nationality: " + d.nationality + "<br>" + "Occupation: " + d.occupation + "<br>")
+                    .style("opacity", 1)
+            }
+
+            const mousemove = function (event, d) {
+                Tooltip
+                    .style("opacity", 1)
+                    .style("left", (d3.pointer(this)[0] + 90) + "px")
+                    .style("top", (d3.pointer(this)[1]) + "px")
+                d3.select(this)
+                    .style("stroke", "red")
+                    .style("opacity", 1)
+            }
+
+            let mouseLeave = function (d) {
+                d3.select(this)
+                    .transition()
+                    .duration(10)
+                    .style("stroke", "lightblue")
+                    .style("opacity", .8)
+            }
 
 
-            // let links = [];
-            // for (let i = 0; i < 10; i++) {
-            //     let obj = {};
-            //     obj.source = "node" + Math.floor(Math.random() * 20);
-            //     obj.target = "node" + Math.floor(Math.random() * 20);
-            //     links.push(obj);
-            // }
-
-            let colorScale = d3.scaleOrdinal()
-                .domain([0, 1, 2])
-                .range(d3.schemeDark2)
 
             let node = svg.append("g")
                 .attr("id", "nodes")
@@ -58,7 +82,10 @@
                 .call(d3.drag()
                     .on("start", dragstarted)
                     .on("drag", dragged)
-                    .on("end", dragended));
+                    .on("end", dragended))
+                .on("mouseover", mouseOver)
+                .on("mousemove", mousemove)
+                .on("mouseleave", mouseLeave);
 
             let linkpath = svg.append("g")
                 .attr("id", "links")
